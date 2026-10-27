@@ -1,0 +1,15 @@
+# A small game-like example using predefined guesses for repeatable testing.
+function check_guess with guess as int, secret as int returns string do
+    if guess < secret then
+        return "Too low"
+    elif guess > secret then
+        return "Too high"
+    else
+        return "You got it!"
+    conclude
+conclude
+
+declare secret as int = 7
+foreach guess in [3, 9, 7] do
+    say "Guess " + text(guess) + ": " + check_guess(guess, secret)
+conclude
