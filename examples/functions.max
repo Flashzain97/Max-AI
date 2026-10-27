@@ -1,0 +1,27 @@
+function greet with name as string returns nothing do
+    say "Hello, " + name + "!"
+conclude
+
+function add(a as int, b as int) returns int do
+    return a + b
+conclude
+
+function factorial with n as int returns int do
+    if n <= 1 then
+        return 1
+    conclude
+    return n * factorial(n - 1)
+conclude
+
+function total with numbers as list<int> returns int do
+    declare result as int = 0
+    foreach number in numbers do
+        result += number
+    conclude
+    return result
+conclude
+
+greet("Flashzain")
+say add(2, 3) * 4
+say factorial(6)
+say total([10, 20, 30])
