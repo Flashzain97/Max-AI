@@ -1,0 +1,5 @@
+# Enter a whole number, such as 14. Invalid input gives a clear conversion error.
+declare name as string = input("What is your name? ")
+declare age as int = integer(input("How old are you? "))
+say "Hello, " + name
+say "Next year you will be " + text(age + 1)
