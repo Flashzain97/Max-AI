@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Max Studio · Write clearly. Run confidently.</title>
+  <style>
+    :root { --bg:#101316; --panel:#171c21; --raised:#1d242b; --editor:#13191f; --line:#2b343d; --text:#e9eef2; --muted:#a5b1bc; --quiet:#7f8d9a; --accent:#a0edce; --accent-dark:#122a23; --danger:#ffb3ad; --danger-bg:#2b1d22; --focus:#b5f5de; --mono:Consolas,"Cascadia Code","SFMono-Regular",Menlo,monospace; --code-size:14px; --code-line:24px; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; font-size:14px; line-height:1.5; }
+    button,input,select,textarea { font:inherit; }
+    button { cursor:pointer; }
+    button:disabled { cursor:default; opacity:.48; }
+    button,input,select,textarea,summary { outline:none; }
+    button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,a:focus-visible { outline:2px solid var(--focus); outline-offset:3px; }
+    ::selection { background:#355c53; color:#fff; }
+    .skip { position:fixed; left:16px; top:-80px; z-index:10; padding:10px 16px; background:var(--accent); color:#10251f; border-radius:8px; }
+    .skip:focus { top:10px; }
+    .topbar { min-height:79px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:20px; padding:16px 30px; background:#13171b; }
+    .brand { display:flex; align-items:center; gap:13px; }
+    .brand-mark { width:39px; height:39px; border:1px solid #59786b; border-radius:11px; background:#1d302a; display:grid; place-items:center; color:var(--accent); }
+    .brand-name { font-size:20px; font-weight:720; letter-spacing:-.7px; line-height:1.15; }
+    .brand-name span { font-weight:420; color:#b9c8c1; }
+    .tagline { color:var(--muted); font-size:12px; margin-top:3px; }
+    .connection { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:12px; }
+    .dot { display:inline-block; width:6px; height:6px; background:var(--accent); border-radius:50%; }
+    .dot.offline { background:#f2bf83; }
+    .version { color:var(--quiet); margin-left:6px; padding-left:12px; border-left:1px solid var(--line); font-family:var(--mono); }
+    .workspace { display:grid; grid-template-columns:218px minmax(0,1fr); min-height:calc(100vh - 79px); }
+    .sidebar { background:#14191d; border-right:1px solid var(--line); padding:28px 18px; }
+    .eyebrow { color:var(--quiet); font-size:10px; font-weight:700; letter-spacing:1.6px; text-transform:uppercase; margin:0 0 12px; }
+    .sidebar-title { margin:0 0 6px; font-weight:650; font-size:15px; }
+    .sidebar-intro { color:var(--muted); font-size:12px; margin:0 0 21px; line-height:1.6; }
+    .examples { display:grid; gap:6px; }
+    .example-button { display:flex; align-items:center; width:100%; text-align:left; gap:11px; padding:12px 10px; background:transparent; color:var(--muted); border:1px solid transparent; border-radius:8px; }
+    .example-button:hover { background:#1c242a; color:var(--text); }
+    .example-button[aria-current="true"] { color:var(--accent); background:#20332c; border-color:#385245; }
+    .example-icon { width:25px; font-family:var(--mono); font-size:16px; text-align:center; opacity:.85; }
+    .example-name { font-weight:570; font-size:12px; }
+    .example-note { color:var(--quiet); font-size:10px; margin-top:1px; }
+    .example-button[aria-current="true"] .example-note { color:#9eb7ac; }
+    .sidebar-divider { height:1px; background:var(--line); margin:26px 3px; }
+    .tip { border:1px solid #344438; background:#1c2922; border-radius:10px; padding:13px; font-size:12px; color:#bbcfc2; }
+    .tip strong { display:block; margin-bottom:5px; color:#e0ece4; font-weight:600; }
+    .help { margin-top:24px; }
+    .mobile-help { display:none; }
+    .help summary { color:var(--muted); font-size:12px; cursor:pointer; padding:7px 0; }
+    .help p { color:var(--muted); font-size:12px; margin:10px 0; line-height:1.65; }
+    .help code { font-family:var(--mono); color:#d4e5dd; }
+    .shortcut { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin:8px 0; gap:8px; }
+    kbd { font-family:var(--mono); font-size:10px; color:#becad5; background:#242d35; border:1px solid #39444e; padding:1px 5px; border-radius:4px; white-space:nowrap; }
+    main { min-width:0; padding:25px 28px 20px; }
+    .welcome { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:19px; }
+    h1 { font-size:24px; line-height:1.25; letter-spacing:-.7px; font-weight:650; margin:0 0 5px; }
+    .welcome p { color:var(--muted); margin:0; font-size:12px; }
+    .mobile-examples { display:none; }
+    .toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+    .controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .button { border:1px solid #3b4852; color:var(--text); background:#222a32; border-radius:7px; min-height:36px; padding:7px 13px; display:inline-flex; align-items:center; justify-content:center; gap:7px; font-size:12px; font-weight:610; white-space:nowrap; }
+    .button:hover:not(:disabled) { background:#2b3540; border-color:#61727c; }
+    .button.primary { color:#102820; background:var(--accent); border-color:var(--accent); padding-left:17px; padding-right:17px; }
+    .button.primary:hover:not(:disabled) { background:#b6f5dc; border-color:#b6f5dc; }
+    .button.quiet { background:transparent; color:var(--muted); border-color:var(--line); }
+    .button.quiet:hover:not(:disabled) { color:var(--text); }
+    .button svg { width:14px; height:14px; flex-shrink:0; }
+    .strict-control { display:flex; align-items:center; gap:8px; color:#c8d2da; font-size:12px; padding:7px 0 7px 9px; cursor:pointer; }
+    .strict-control input { width:15px; height:15px; margin:0; accent-color:var(--accent); }
+    .draft-status { color:var(--quiet); font-size:11px; }
+    .workpanels { display:grid; grid-template-columns:minmax(300px,1fr) minmax(265px,350px); gap:15px; align-items:stretch; }
+    .panel { border:1px solid var(--line); border-radius:10px; background:var(--panel); overflow:hidden; min-width:0; }
+    .panel-head { min-height:51px; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 16px; border-bottom:1px solid var(--line); }
+    .panel-title { font-size:12px; font-weight:620; display:flex; align-items:center; gap:8px; margin:0; }
+    .panel-title svg { width:14px; height:14px; color:var(--quiet); }
+    .filename-label { display:flex; align-items:center; gap:6px; min-width:0; }
+    .filename { border:1px solid transparent; border-radius:4px; color:var(--muted); background:transparent; padding:2px 5px; width:170px; max-width:100%; font-family:var(--mono); font-size:11px; text-align:right; }
+    .filename:hover { border-color:#39444d; }
+    .filename:focus { color:var(--text); border-color:#5f7c71; background:#202b27; }
+    .editor-container { display:flex; position:relative; background:var(--editor); height:471px; }
+    .line-gutter { width:50px; flex-shrink:0; overflow:hidden; padding:17px 12px 17px 0; margin:0; text-align:right; user-select:none; color:#637587; font-family:var(--mono); font-size:var(--code-size); line-height:var(--code-line); background:#11171c; border-right:1px solid #212a32; }
+    .line-gutter span { display:block; }
+    #code { resize:none; min-width:0; width:100%; height:100%; border:0; padding:17px 19px; margin:0; background:transparent; color:#d6e4eb; caret-color:var(--accent); font-family:var(--mono); font-size:var(--code-size); line-height:var(--code-line); white-space:pre; tab-size:4; overflow:auto; }
+    #code:focus-visible { outline:none; box-shadow:inset 0 0 0 2px #4b7763; }
+    .editor-foot { padding:7px 13px; min-height:33px; border-top:1px solid var(--line); background:#181f25; display:flex; align-items:center; justify-content:space-between; gap:10px; font-family:var(--mono); font-size:10px; color:var(--quiet); }
+    .editor-foot .mode { color:#91bca7; }
+    .results { display:flex; flex-direction:column; }
+    .result-top { padding:17px 17px 16px; border-bottom:1px solid var(--line); min-height:78px; }
+    .state-label { display:flex; align-items:center; gap:8px; color:var(--accent); font-size:12px; font-weight:600; margin-bottom:4px; }
+    .state-label.error { color:var(--danger); }
+    .state-label.working { color:#e8d19e; }
+    .state-mark { width:18px; height:18px; display:grid; place-items:center; border:1px solid currentColor; border-radius:50%; font-size:10px; }
+    .state-detail { margin:0; color:var(--muted); font-size:11px; padding-left:26px; }
+    .console { padding:17px; flex:1; min-height:130px; }
+    .console .eyebrow { margin-bottom:13px; font-size:9px; }
+    .empty-output { color:var(--quiet); font-size:12px; margin:0; max-width:255px; line-height:1.7; }
+    pre.output { font:12px/1.85 var(--mono); margin:0; color:#d3e3db; white-space:pre-wrap; overflow-wrap:anywhere; tab-size:4; max-height:325px; overflow:auto; }
+    .errors { border-top:1px solid #554039; background:var(--danger-bg); padding:15px 17px; }
+    .errors h3 { margin:0 0 8px; font-size:11px; color:var(--danger); font-weight:620; }
+    .errors pre { margin:0; color:#e9c0bd; font:11px/1.7 var(--mono); white-space:pre-wrap; overflow-wrap:anywhere; max-height:215px; overflow:auto; }
+    .diagnostic-button { border:0; border-bottom:1px solid #9a6e68; border-radius:0; color:#ffbdb6; background:transparent; font-size:11px; padding:2px 0; margin-top:10px; text-align:left; }
+    .diagnostic-button:hover { color:#ffe0dc; }
+    .result-foot { padding:9px 16px; border-top:1px solid var(--line); color:var(--quiet); font-size:10px; min-height:34px; }
+    .input-panel { margin-top:15px; }
+    .input-head { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:12px 16px 10px; }
+    .input-head label { font-size:12px; font-weight:620; }
+    .input-head p { margin:0; color:var(--quiet); font-size:11px; }
+    #input { display:block; width:calc(100% - 32px); margin:0 16px 14px; border:1px solid #33404a; border-radius:6px; background:#11181d; color:#d6e4eb; min-height:77px; max-height:240px; padding:9px 12px; resize:vertical; font:12px/1.7 var(--mono); }
+    #input::placeholder { color:#71808e; }
+    .bottom-row { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:12px; flex-wrap:wrap; }
+    .recovery { display:flex; align-items:center; flex-wrap:wrap; gap:8px; min-height:28px; }
+    .recovery .button { min-height:28px; font-size:10px; padding:3px 9px; }
+    .recovery span { color:var(--quiet); font-size:10px; }
+    .privacy { color:var(--quiet); font-size:10px; display:flex; align-items:center; gap:6px; }
+    .privacy svg { width:11px; height:11px; }
+    .notice { background:#26332b; border:1px solid #42604e; color:#d2e2d7; border-radius:7px; padding:10px 13px; margin-bottom:14px; display:flex; justify-content:space-between; gap:12px; align-items:center; font-size:12px; }
+    .notice.warning { background:#30291f; border-color:#655039; color:#f0d8b2; }
+    .notice button { background:transparent; border:0; color:inherit; font-size:18px; padding:0 4px; }
+    .visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    [hidden] { display:none!important; }
+    @media (min-width:1600px) { main { max-width:1450px; width:100%; margin:0 auto; } .editor-container { height:570px; } pre.output { max-height:400px; } .workpanels { grid-template-columns:minmax(400px,1fr) 390px; } }
+    @media (max-width:1120px) { .workspace { grid-template-columns:186px minmax(0,1fr); } .sidebar { padding:26px 12px; } main { padding:22px 20px; } .workpanels { grid-template-columns:minmax(280px,1fr) minmax(220px,280px); } .filename { width:135px; } .panel-head { padding-left:12px; padding-right:12px; } }
+    @media (max-width:920px) { .workspace { grid-template-columns:1fr; } .sidebar { display:none; } .mobile-examples { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:11px; } .mobile-examples select { color:var(--text); background:#212a31; border:1px solid #3c4852; padding:7px 28px 7px 10px; border-radius:6px; min-height:34px; } .workpanels { grid-template-columns:minmax(300px,1fr) minmax(255px,320px); } main { padding:23px; } .topbar { padding:16px 23px; } .mobile-help { display:block; } }
+    @media (max-width:700px) { .topbar { padding:14px 16px; min-height:73px; gap:10px; } .brand-mark { width:34px; height:34px; border-radius:9px; } .brand { gap:10px; } .brand-name { font-size:18px; } .tagline { font-size:10px; } .connection { font-size:10px; gap:5px; } .version { display:none; } main { padding:20px 15px; } h1 { font-size:22px; } .welcome { flex-direction:column; gap:14px; margin-bottom:15px; } .mobile-examples { width:100%; } .mobile-examples select { flex:1; } .toolbar { gap:8px; } .controls { gap:7px; } .button { padding:7px 11px; } .strict-control { padding-left:4px; } .draft-status { width:100%; } .workpanels { grid-template-columns:1fr; } .editor-container { height:380px; } .line-gutter { width:42px; padding-right:9px; } #code { padding-left:12px; font-size:13px; } .results { min-height:235px; } pre.output { max-height:230px; } .console { min-height:85px; } .result-top { min-height:70px; padding-top:13px; padding-bottom:13px; } .input-head { gap:5px; } .input-head p { width:100%; } .privacy { font-size:9px; } .bottom-row { align-items:flex-start; } .editor-foot { font-size:9px; } }
+    @media (prefers-reduced-motion:no-preference) { .button { transition:background .12s,border-color .12s; } .state-label.working .state-mark { animation:pulse 1.4s ease-in-out infinite; } @keyframes pulse { 50% { opacity:.35; } } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#code">Skip to your program</a>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 18V6l8 8 8-8v12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="brand-name">Max <span>Studio</span></div><div class="tagline">Write clearly. Run confidently.</div></div>
+    </div>
+    <div class="connection"><span id="connectionDot" class="dot" aria-hidden="true"></span><span id="connectionLabel">Connecting locally</span><span id="version" class="version">Max</span></div>
+  </header>
+  <div class="workspace">
+    <aside class="sidebar" aria-label="Examples and help">
+      <p class="eyebrow">A place to begin</p>
+      <h2 class="sidebar-title">Explore the language</h2>
+      <p class="sidebar-intro">Small programs. Clear rules.<br>Make an example your own.</p>
+      <nav class="examples" aria-label="Example programs">
+        <button class="example-button" data-example="starter" aria-current="true"><span class="example-icon" aria-hidden="true">↗</span><span><span class="example-name">First steps</span><span class="example-note" style="display:block">Scores, lists &amp; decisions</span></span></button>
+        <button class="example-button" data-example="functions" aria-current="false"><span class="example-icon" aria-hidden="true">ƒ</span><span><span class="example-name">Functions</span><span class="example-note" style="display:block">Name a reusable idea</span></span></button>
+        <button class="example-button" data-example="possible" aria-current="false"><span class="example-icon" aria-hidden="true">?</span><span><span class="example-name">True, false, possible</span><span class="example-note" style="display:block">Give uncertainty a branch</span></span></button>
+        <button class="example-button" data-example="input" aria-current="false"><span class="example-icon" aria-hidden="true">⌨</span><span><span class="example-name">A conversation</span><span class="example-note" style="display:block">Read answers &amp; numbers</span></span></button>
+        <button class="example-button" data-example="guessing" aria-current="false"><span class="example-icon" aria-hidden="true">◇</span><span><span class="example-name">Guessing game</span><span class="example-note" style="display:block">Three guesses, one number</span></span></button>
+      </nav>
+      <div class="sidebar-divider"></div>
+      <div class="tip"><strong>Strict can still be simple.</strong>Say what a value can hold with <code>as int</code> or <code>as string</code>. Max checks the promise.</div>
+      <details class="help" open><summary>Quick guide</summary><p><code>declare</code> creates a value.<br><code>say</code> prints it.<br><code>conclude</code> closes a block.</p><p>Choose <strong>Check</strong> to find syntax, name and type errors without running the program. <strong>Run</strong> checks first, then executes.</p><p>Strict mode asks for written types. Turn it off to use inferred or changing values.</p><div class="shortcut"><span>Run your program</span><kbd>Ctrl Enter</kbd></div><div class="shortcut"><span>Save a .max file</span><kbd>Ctrl S</kbd></div><div class="shortcut"><span>Indent / unindent</span><kbd>Tab / Shift Tab</kbd></div></details>
+      <details class="help"><summary>Limits &amp; local drafts</summary><p>Programs, input and output are each limited to 65,536 characters. A run stops after 10 seconds. Shorter programs are easier to understand and check.</p><p>Drafts are saved in this browser when available. Save a <code>.max</code> copy to keep your work outside Studio.</p><p>Examples keep your previous program in a recovery slot. Use <strong>Restore previous draft</strong> below the editor.</p></details>
+    </aside>
+    <main>
+      <div class="welcome"><div><h1>Make something understandable.</h1><p>Write a program, check its promises, and see what happens.</p></div><div class="mobile-examples"><label for="exampleSelect">Example</label><select id="exampleSelect"><option value="starter">First steps</option><option value="functions">Functions</option><option value="possible">True, false, possible</option><option value="input">A conversation</option><option value="guessing">Guessing game</option><option value="draft" hidden>Your draft</option></select></div></div>
+      <div id="notice" class="notice" role="status" hidden><span id="noticeText"></span><button id="dismissNotice" type="button" aria-label="Dismiss notice">×</button></div>
+      <div class="toolbar">
+        <div class="controls"><button id="run" class="button primary" title="Run your program (Ctrl+Enter)"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.5 13 8l-9 5.5z"/></svg><span id="runLabel">Run</span></button><button id="check" class="button" title="Check without running"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3 8 3 3 7-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Check</button><button id="open" class="button quiet" title="Open an existing .max file">Open .max</button><input id="openFile" type="file" accept=".max,text/plain" hidden><button id="save" class="button quiet" title="Save a .max file (Ctrl+S)"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2v8m-3-3 3 3 3-3M3 11v3h10v-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Save .max</button><label class="strict-control" title="Require explicit variable, parameter and result types"><input id="strict" type="checkbox" checked>Strict types</label></div>
+        <span id="draftStatus" class="draft-status" aria-live="polite">Draft saved in this browser</span>
+      </div>
+      <div class="workpanels">
+        <section class="panel editor-panel" aria-labelledby="programHeading"><div class="panel-head"><h2 id="programHeading" class="panel-title"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m5 4-4 4 4 4m6-8 4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Your program</h2><label class="filename-label"><span class="visually-hidden">File name</span><input id="filename" class="filename" value="first-steps.max" maxlength="120" autocomplete="off" spellcheck="false" aria-label="File name"></label></div><div class="editor-container"><div id="gutter" class="line-gutter" aria-hidden="true"><div id="lineNumbers"></div></div><textarea id="code" aria-label="Max source code" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" wrap="off"></textarea></div><div class="editor-foot"><span id="cursorPosition">Ln 1, Col 1</span><span id="codeSize">0 lines</span><span id="modeLabel" class="mode">Strict mode</span></div></section>
+        <section class="panel results" aria-labelledby="resultsHeading"><div class="panel-head"><h2 id="resultsHeading" class="panel-title">Results</h2><span id="elapsed" class="draft-status">Ready</span></div><div class="result-top" aria-live="polite" aria-atomic="true"><div id="stateLabel" class="state-label"><span id="stateMark" class="state-mark" aria-hidden="true">✓</span><span id="stateTitle">Ready for your first run</span></div><p id="stateDetail" class="state-detail">Try changing a score, then press Run.</p></div><div class="console"><p class="eyebrow">Program output</p><p id="emptyOutput" class="empty-output">What your program says will appear here. You can also Check first to catch mistakes.</p><pre id="output" class="output" aria-label="Program output" tabindex="0" hidden></pre></div><div id="errors" class="errors" hidden><h3 id="errorHeading">Something needs attention</h3><pre id="error" aria-label="Program errors" tabindex="0"></pre><button id="diagnostic" class="diagnostic-button" hidden></button></div><div id="resultFoot" class="result-foot">Results stay here while you edit.</div></section>
+      </div>
+      <section class="panel input-panel" aria-labelledby="inputLabel"><div class="input-head"><label id="inputLabel" for="input">Answers for input()</label><p id="inputHelp">One answer per line, read from top to bottom. Used only when your program asks.</p></div><textarea id="input" aria-describedby="inputHelp" placeholder="For example, the conversation example uses two lines:&#10;Alex&#10;14" spellcheck="false"></textarea></section>
+      <div class="bottom-row"><div class="recovery"><button id="restore" class="button quiet" disabled>Restore previous draft</button><span id="recoveryLabel">Examples keep a copy of the program they replace.</span></div><span class="privacy"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor"/><path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="currentColor"/></svg>Runs on this computer. No account needed.</span></div>
+      <details class="help mobile-help"><summary>Help, shortcuts &amp; limits</summary><p>Use <code>declare</code> to create a value, <code>say</code> to print it, and <code>conclude</code> to close a block. Strict mode requires written types. Check finds syntax, name and known type errors without running.</p><p><kbd>Ctrl Enter</kbd> runs. <kbd>Ctrl S</kbd> saves. <kbd>Tab</kbd> indents and <kbd>Shift Tab</kbd> unindents selected lines. Mac keyboards can use Command instead of Ctrl.</p><p>Programs, input and output are each limited to 65,536 characters. Runs stop after 10 seconds. Save a .max copy to keep your work outside this browser.</p></details>
+    </main>
+  </div>
+  <script>
+  'use strict';
+  (() => {
+    const $ = id => document.getElementById(id);
+    const elements = Object.fromEntries(['code','input','strict','filename','run','runLabel','check','save','open','openFile','restore','recoveryLabel','draftStatus','gutter','lineNumbers','cursorPosition','codeSize','modeLabel','exampleSelect','notice','noticeText','dismissNotice','output','emptyOutput','errors','error','errorHeading','diagnostic','elapsed','stateLabel','stateMark','stateTitle','stateDetail','resultFoot','connectionDot','connectionLabel','version'].map(id => [id, $(id)]));
+    const samples = {
+      starter: { name:'First steps', filename:'first-steps.max', input:'', code:`# Change a score, then press Run.
+# Each variable states the kind of value it holds.
+
+declare player as string = "Alex"
+declare scores as list<int> = [8, 12, 10]
+declare total as int = 0
+
+foreach score in scores do
+    total += score
+conclude
+
+say "Player: " + player
+say "Total points: " + text(total)
+
+if total >= 30 then
+    say "Target reached!"
+else
+    say "Keep going."
+conclude
+` },
+      functions: { name:'Functions', filename:'functions.max', input:'', code:`# A function gives a reusable idea a name.
+function greet with name as string returns nothing do
+    say "Hello, " + name + "!"
+conclude
+
+function square(number as int) returns int do
+    return number * number
+conclude
+
+function factorial with number as int returns int do
+    if number <= 1 then
+        return 1
+    conclude
+    return number * factorial(number - 1)
+conclude
+
+greet("Alex")
+say "Six squared: " + text(square(6))
+say "Five factorial: " + text(factorial(5))
+` },
+      possible: { name:'True, false, possible', filename:'possible.max', input:'', code:`# boolean admits true, false and possible.
+# Try replacing possible with true or false.
+declare willRain as boolean = possible
+
+if willRain then
+    say "Take an umbrella."
+maybe
+    say "The forecast is uncertain. Bring one just in case."
+else
+    say "Leave the umbrella at home."
+conclude
+
+say "The forecast says: " + text(willRain)
+say "The opposite says: " + text(not willRain)
+` },
+      input: { name:'A conversation', filename:'conversation.max', input:'Alex\n14\n', code:`# The answers below are read in order.
+# Try a different name and age in the input box.
+declare name as string = input("What is your name?\\n")
+declare age as int = integer(input("How old are you?\\n"))
+
+say "Hello, " + name + "!"
+say "Next year you will be " + text(age + 1)
+
+if age >= 13 then
+    say "You can build something interesting with Max."
+else
+    say "Start small, and see what you can make."
+conclude
+` },
+      guessing: { name:'Guessing game', filename:'guessing-game.max', input:'5\n9\n7\n', code:`# A tiny game: find the secret number in three guesses.
+# Write three whole-number guesses in the input box.
+declare secret as int = 7
+declare solved as boolean = false
+
+say "Guess a number from 1 to 10."
+
+for attempt = 1 to 3 do
+    if not solved then
+        declare guess as int = integer(input("Your guess:\\n"))
+        if guess == secret then
+            solved = true
+            say "You found it on attempt " + text(attempt) + "!"
+        elif guess < secret then
+            say "Try a higher number."
+        else
+            say "Try a lower number."
+        conclude
+    conclude
+conclude
+
+if not solved then
+    say "The secret was " + text(secret) + ". Try again."
+conclude
+` }
+    };
+    const storageKey = 'max-studio-draft-v1';
+    const encoder = new TextEncoder();
+    const maxCharacters = 65536;
+    let activeExample = 'starter';
+    let backups = [];
+    let busy = false;
+    let storageAvailable = true;
+    let saveTimer;
+    let lastResultCode = null;
+    let lastResultInput = null;
+    let lastResultStrict = null;
+    let diagnosticPosition = null;
+    let lastLineCount = 0;
+
+    function snapshot() {
+      return { code:elements.code.value, input:elements.input.value, strict:elements.strict.checked, filename:elements.filename.value, example:activeExample, savedAt:Date.now() };
+    }
+    function isDraft(value) {
+      return value && typeof value === 'object' && typeof value.code === 'string' && typeof value.input === 'string' && typeof value.filename === 'string' && typeof value.strict === 'boolean';
+    }
+    function tell(message, warning = false) {
+      elements.noticeText.textContent = message;
+      elements.notice.classList.toggle('warning', warning);
+      elements.notice.hidden = false;
+    }
+    function persist() {
+      clearTimeout(saveTimer);
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({ draft:snapshot(), backups }));
+        storageAvailable = true;
+        elements.draftStatus.textContent = 'Draft saved in this browser';
+      } catch (_) {
+        if (storageAvailable) tell('This browser cannot save drafts right now. Save a .max file to keep your program.', true);
+        storageAvailable = false;
+        elements.draftStatus.textContent = 'Browser storage unavailable · save a .max copy';
+      }
+    }
+    function scheduleSave() {
+      elements.draftStatus.textContent = storageAvailable ? 'Saving your draft…' : 'Browser storage unavailable · save a .max copy';
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(persist, 300);
+    }
+    function selectExampleState() {
+      document.querySelectorAll('[data-example]').forEach(button => button.setAttribute('aria-current', String(button.dataset.example === activeExample)));
+      elements.exampleSelect.value = samples[activeExample] ? activeExample : 'draft';
+    }
+    function updateRecovery() {
+      elements.restore.disabled = backups.length === 0;
+      elements.recoveryLabel.textContent = backups.length ? 'Previous program kept safely; restore it here.' : 'Examples keep a copy of the program they replace.';
+    }
+    function applyDraft(draft) {
+      elements.code.value = draft.code;
+      elements.input.value = draft.input;
+      elements.strict.checked = draft.strict;
+      elements.filename.value = draft.filename;
+      activeExample = samples[draft.example] ? draft.example : 'draft';
+      elements.code.scrollTop = 0;
+      elements.code.scrollLeft = 0;
+      elements.code.setSelectionRange(0, 0);
+      selectExampleState();
+      updateEditor();
+      updateResultFreshness();
+    }
+    function loadExample(key) {
+      if (!samples[key]) return;
+      const sample = samples[key];
+      if (elements.code.value === sample.code && elements.input.value === sample.input && elements.strict.checked) {
+        activeExample = key;
+        selectExampleState();
+        return;
+      }
+      backups.push(snapshot());
+      backups = backups.slice(-5);
+      applyDraft({ ...sample, strict:true, example:key });
+      updateRecovery();
+      persist();
+      tell(sample.name + ' is open. Your previous program is saved under Restore previous draft.');
+    }
+    function updateEditor() {
+      const code = elements.code.value;
+      const count = code.split('\n').length;
+      if (count !== lastLineCount) {
+        const fragment = document.createDocumentFragment();
+        for (let line = 1; line <= count; line++) {
+          const span = document.createElement('span');
+          span.textContent = line;
+          fragment.appendChild(span);
+        }
+        elements.lineNumbers.replaceChildren(fragment);
+        lastLineCount = count;
+      }
+      elements.gutter.scrollTop = elements.code.scrollTop;
+      const bytes = encoder.encode(code).length;
+      elements.codeSize.textContent = count + (count === 1 ? ' line' : ' lines') + ' · ' + (bytes < 1024 ? bytes + ' B' : (bytes / 1024).toFixed(1) + ' KB');
+      elements.modeLabel.textContent = elements.strict.checked ? 'Strict mode' : 'Flexible types';
+      updateCursor();
+    }
+    function updateCursor() {
+      const before = elements.code.value.slice(0, elements.code.selectionStart);
+      const line = before.split('\n').length;
+      const column = before.length - before.lastIndexOf('\n');
+      elements.cursorPosition.textContent = 'Ln ' + line + ', Col ' + column;
+    }
+    function updateResultFreshness() {
+      if (lastResultCode === null) return;
+      const changed = elements.code.value !== lastResultCode || elements.input.value !== lastResultInput || elements.strict.checked !== lastResultStrict;
+      elements.resultFoot.textContent = changed ? 'Program or answers changed since these results.' : 'Results match the current program and answers.';
+      elements.diagnostic.disabled = elements.code.value !== lastResultCode;
+      elements.diagnostic.title = elements.diagnostic.disabled ? 'Restore the program that produced this error to jump to its location.' : 'Select the place in your program that needs attention.';
+    }
+    function changed() {
+      activeExample = 'draft';
+      selectExampleState();
+      updateEditor();
+      updateResultFreshness();
+      scheduleSave();
+    }
+    function sanitizeFilename(value) {
+      let name = value.replace(/\\/g, '/').split('/').pop().replace(/[<>:"|?*\x00-\x1f]/g, '').trim();
+      name = name.replace(/\.max$/i, '').replace(/^[. ]+|[. ]+$/g, '');
+      if (!name) name = 'my-program';
+      if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(name)) name = '_' + name;
+      return name.slice(0, 96).replace(/[. ]+$/g, '') + '.max';
+    }
+    function saveFile() {
+      const name = sanitizeFilename(elements.filename.value);
+      elements.filename.value = name;
+      const blob = new Blob([elements.code.value], { type:'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      persist();
+      tell(name + ' is ready to save. Your browser controls the download location.');
+    }
+    async function openFile() {
+      const file = elements.openFile.files[0];
+      if (!file) return;
+      try {
+        if (file.size > maxCharacters * 4) throw new Error('This file is too large for Studio. Open a program with no more than 65,536 characters.');
+        const code = await file.text();
+        if (code.length > maxCharacters) throw new Error('This file is too large for Studio. Open a program with no more than 65,536 characters.');
+        backups.push(snapshot());
+        backups = backups.slice(-5);
+        applyDraft({ code, input:'', strict:elements.strict.checked, filename:sanitizeFilename(file.name), example:'draft' });
+        updateRecovery();
+        persist();
+        tell(elements.filename.value + ' is open. Your previous program is kept under Restore previous draft.');
+      } catch (error) {
+        tell(error.message || 'This file could not be read. Your current program is still here.', true);
+      } finally {
+        elements.openFile.value = '';
+      }
+    }
+    function setState(title, detail, kind = 'ready') {
+      elements.stateTitle.textContent = title;
+      elements.stateDetail.textContent = detail;
+      elements.stateLabel.classList.toggle('error', kind === 'error');
+      elements.stateLabel.classList.toggle('working', kind === 'working');
+      elements.stateMark.textContent = kind === 'working' ? '·' : kind === 'error' ? '!' : '✓';
+    }
+    function showError(message, line, column) {
+      elements.errors.hidden = false;
+      elements.error.textContent = message;
+      diagnosticPosition = Number.isInteger(line) && line > 0 && Number.isInteger(column) && column > 0 ? { line,column } : null;
+      elements.diagnostic.hidden = diagnosticPosition === null;
+      if (diagnosticPosition) elements.diagnostic.textContent = 'Go to line ' + line + ', column ' + column + ' ↗';
+    }
+    function jumpToDiagnostic() {
+      if (!diagnosticPosition || elements.code.value !== lastResultCode) return;
+      const lines = elements.code.value.split('\n');
+      const line = Math.min(diagnosticPosition.line, lines.length);
+      const start = lines.slice(0, line - 1).reduce((length, value) => length + value.length + 1, 0);
+      const column = Math.min(diagnosticPosition.column - 1, lines[line - 1].length);
+      const offset = start + column;
+      elements.code.focus();
+      elements.code.setSelectionRange(offset, Math.min(offset + 1, start + lines[line - 1].length));
+      const lineHeight = parseFloat(getComputedStyle(elements.code).lineHeight) || 24;
+      elements.code.scrollTop = Math.max(0, (line - 1) * lineHeight - elements.code.clientHeight / 3);
+      elements.gutter.scrollTop = elements.code.scrollTop;
+      updateCursor();
+    }
+    async function perform(kind) {
+      if (busy) return;
+      const current = snapshot();
+      if (current.code.length > maxCharacters || current.input.length > maxCharacters) {
+        setState('This program is too large', 'Keep the program and answers below 65,536 characters each.', 'error');
+        showError('Programs and input answers may each use up to 65,536 characters. Shorten the larger text and try again.');
+        elements.elapsed.textContent = 'Not run';
+        return;
+      }
+      busy = true;
+      elements.run.disabled = true;
+      elements.check.disabled = true;
+      elements.runLabel.textContent = kind === 'run' ? 'Running…' : 'Run';
+      elements.output.textContent = '';
+      elements.output.hidden = true;
+      elements.emptyOutput.hidden = false;
+      elements.emptyOutput.textContent = kind === 'run' ? 'Your program is running…' : 'Checking syntax, names and types…';
+      elements.errors.hidden = true;
+      elements.diagnostic.hidden = true;
+      diagnosticPosition = null;
+      elements.elapsed.textContent = kind === 'run' ? 'Running' : 'Checking';
+      setState(kind === 'run' ? 'Running your program' : 'Checking your program', 'The result will appear here shortly.', 'working');
+      lastResultCode = current.code;
+      lastResultInput = current.input;
+      lastResultStrict = current.strict;
+      updateResultFreshness();
+      persist();
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      try {
+        const response = await fetch('/api/' + kind, { method:'POST', headers:{ 'Content-Type':'application/json', 'Accept':'application/json' }, body:JSON.stringify({ code:current.code, input:current.input, strict:current.strict }), signal:controller.signal });
+        const result = await response.json();
+        if (!response.ok) throw new Error(typeof result.error === 'string' ? result.error : 'The local runner could not process this request.');
+        const output = typeof result.output === 'string' ? result.output : '';
+        const error = typeof result.error === 'string' ? result.error : '';
+        const elapsedMs = typeof result.elapsedMs === 'number' && Number.isFinite(result.elapsedMs) ? Math.max(0, result.elapsedMs) : null;
+        elements.elapsed.textContent = elapsedMs === null ? 'Finished' : elapsedMs < 1000 ? Math.round(elapsedMs) + ' ms' : (elapsedMs / 1000).toFixed(2) + ' s';
+        elements.output.textContent = output;
+        elements.output.hidden = output.length === 0;
+        elements.emptyOutput.hidden = output.length > 0;
+        if (result.exitCode === 0) {
+          setState(kind === 'check' ? 'Checks passed' : 'Program finished', kind === 'check' ? (current.strict ? 'Strict checks passed. Your program was not run.' : 'Syntax, names and known types passed.') : 'Your program ran successfully.');
+          elements.emptyOutput.textContent = kind === 'check' ? 'Check does not execute your program or read answers. Press Run to see its output.' : 'Your program finished without printing anything. Add say followed by a value to show it here.';
+        } else {
+          setState('Something needs attention', 'Read the message below, then make a small change.', 'error');
+          elements.emptyOutput.textContent = 'No program output was produced before this error.';
+          showError(error || 'The program stopped without completing. Check its loops and input answers, then try again.', result.line, result.column);
+        }
+        elements.connectionDot.classList.remove('offline');
+        elements.connectionLabel.textContent = 'Local runner ready';
+      } catch (error) {
+        const message = error.name === 'AbortError' ? 'The local runner did not answer in time. A run is limited to 10 seconds; try a smaller program or restart Max Studio.' : (error instanceof TypeError ? 'Cannot reach the local Max runner. Open Max Studio using its launcher, or restart it. Your program is still here and can be saved.' : error.message || 'The local runner could not complete this request.');
+        setState('Could not complete this request', 'Your draft is safe. See the message below.', 'error');
+        showError(message);
+        elements.emptyOutput.textContent = 'No results are available for this request.';
+        elements.elapsed.textContent = 'Not completed';
+        elements.connectionDot.classList.add('offline');
+        elements.connectionLabel.textContent = 'Runner unavailable';
+      } finally {
+        clearTimeout(timeout);
+        busy = false;
+        elements.run.disabled = false;
+        elements.check.disabled = false;
+        elements.runLabel.textContent = 'Run';
+        updateResultFreshness();
+      }
+    }
+    function indentSelection(unindent) {
+      const editor = elements.code;
+      const source = editor.value;
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      if (!unindent && start === end) {
+        const spaces = ' '.repeat(4 - ((start - source.lastIndexOf('\n', start - 1) - 1) % 4));
+        editor.setRangeText(spaces, start, end, 'end');
+      } else {
+        const lineStart = start === 0 ? 0 : source.lastIndexOf('\n', start - 1) + 1;
+        const finalPosition = end > start && source[end - 1] === '\n' ? end - 1 : end;
+        const nextBreak = source.indexOf('\n', finalPosition);
+        const lineEnd = nextBreak === -1 ? source.length : nextBreak;
+        const lines = source.slice(lineStart, lineEnd).split('\n');
+        let firstChange = 0;
+        let totalChange = 0;
+        const replacement = lines.map((line, index) => {
+          const removed = unindent ? (line.startsWith('\t') ? 1 : (line.match(/^ {1,4}/) || [''])[0].length) : 0;
+          const delta = unindent ? -removed : 4;
+          if (index === 0) firstChange = delta;
+          totalChange += delta;
+          return unindent ? line.slice(removed) : '    ' + line;
+        }).join('\n');
+        editor.setRangeText(replacement, lineStart, lineEnd, 'preserve');
+        editor.setSelectionRange(Math.max(lineStart, start + firstChange), Math.max(lineStart, end + totalChange));
+      }
+      changed();
+    }
+
+    elements.code.addEventListener('input', changed);
+    elements.input.addEventListener('input', () => { updateResultFreshness(); scheduleSave(); });
+    elements.strict.addEventListener('change', () => { updateEditor(); updateResultFreshness(); scheduleSave(); });
+    elements.filename.addEventListener('input', scheduleSave);
+    elements.filename.addEventListener('blur', () => { elements.filename.value = sanitizeFilename(elements.filename.value); scheduleSave(); });
+    elements.code.addEventListener('scroll', () => { elements.gutter.scrollTop = elements.code.scrollTop; });
+    ['click','keyup','select'].forEach(name => elements.code.addEventListener(name, updateCursor));
+    elements.code.addEventListener('keydown', event => { if (event.key === 'Tab') { event.preventDefault(); indentSelection(event.shiftKey); } });
+    document.addEventListener('keydown', event => {
+      if (event.ctrlKey || event.metaKey) {
+        if (event.key.toLowerCase() === 's') { event.preventDefault(); saveFile(); }
+        if (event.key === 'Enter') { event.preventDefault(); perform('run'); }
+      }
+    });
+    elements.run.addEventListener('click', () => perform('run'));
+    elements.check.addEventListener('click', () => perform('check'));
+    elements.save.addEventListener('click', saveFile);
+    elements.open.addEventListener('click', () => elements.openFile.click());
+    elements.openFile.addEventListener('change', openFile);
+    elements.diagnostic.addEventListener('click', jumpToDiagnostic);
+    elements.dismissNotice.addEventListener('click', () => { elements.notice.hidden = true; });
+    document.querySelectorAll('[data-example]').forEach(button => button.addEventListener('click', () => loadExample(button.dataset.example)));
+    elements.exampleSelect.addEventListener('change', () => loadExample(elements.exampleSelect.value));
+    elements.restore.addEventListener('click', () => {
+      if (!backups.length) return;
+      const current = snapshot();
+      const previous = backups.pop();
+      backups.push(current);
+      applyDraft(previous);
+      updateRecovery();
+      persist();
+      tell('Previous draft restored. The program you just left is also kept in the recovery slot.');
+    });
+    window.addEventListener('pagehide', persist);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') persist(); });
+
+    applyDraft({ ...samples.starter, strict:true, example:'starter' });
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
+      if (saved && isDraft(saved.draft)) {
+        applyDraft(saved.draft);
+        backups = Array.isArray(saved.backups) ? saved.backups.filter(isDraft).slice(-5) : [];
+        tell('Your last draft is back. Keep editing, or Save .max to keep a separate copy.');
+      }
+    } catch (_) {
+      storageAvailable = false;
+      elements.draftStatus.textContent = 'Browser storage unavailable · save a .max copy';
+      tell('Your browser could not restore a draft. Editing and saving .max files still work.', true);
+    }
+    updateRecovery();
+    updateEditor();
+    persist();
+    fetch('/api/info', { headers:{ 'Accept':'application/json' } }).then(async response => {
+      if (!response.ok) throw new Error('Unavailable');
+      const info = await response.json();
+      elements.connectionLabel.textContent = 'Local runner ready';
+      elements.version.textContent = typeof info.version === 'string' ? 'v' + info.version : 'Max';
+    }).catch(() => {
+      elements.connectionDot.classList.add('offline');
+      elements.connectionLabel.textContent = 'Runner unavailable';
+      tell('Open this page using the Max Studio launcher to run programs. Editing and saving .max files still work.', true);
+    });
+  })();
+  </script>
+</body>
+</html>

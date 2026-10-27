@@ -1,0 +1,25 @@
+# Run: .\max.exe --strict .\first.max
+# Every variable, parameter and result states its type.
+
+function total with scores as list<int> returns int do
+    declare result as int = 0
+    foreach score in scores do
+        result += score
+    conclude
+    return result
+conclude
+
+declare player as string = "Alex"
+declare scores as list<int> = [8, 12, 10]
+append(scores, 15)
+declare points as int = total(scores)
+
+say "Player: " + player
+say "Rounds: " + text(length(scores))
+say "Total points: " + text(points)
+
+if points >= 40 then
+    say "You reached the target!"
+else
+    say "Keep going."
+conclude
