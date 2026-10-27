@@ -1,0 +1,15 @@
+# Types make promises about values. Add ? when nil is allowed.
+function describe with name as string, points as int? returns string do
+    if points == nil then
+        return name + " has no score"
+    else
+        return name + " has " + text(points) + " points"
+    conclude
+conclude
+
+declare scores as list<int?> = [10, nil, 15]
+foreach score in scores do
+    say describe("Player", score)
+conclude
+
+say "Entries: " + text(length(scores))
