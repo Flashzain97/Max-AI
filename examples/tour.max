@@ -1,0 +1,36 @@
+# Original examples, plus Max's three-valued condition.
+declare number as int = 10, resort 50
+number = nil
+say number
+
+declare example as int = 5
+if example > 0 then
+    say "BLOW"
+elif example < 0 then
+    say "WOLB"
+else
+    say "???"
+conclude
+
+declare x as int = 0
+while x <= 5 do
+    say x
+    x += 1
+conclude
+
+for i = 5 to 15, step 2 do
+    say i
+conclude
+
+declare items as list<string> = ["Bananas", "Fruits", "Pineapples"]
+foreach item in items do
+    say item
+conclude
+
+if possible then
+    say "Yes"
+maybe
+    say "We do not know yet"
+else
+    say "No"
+conclude
